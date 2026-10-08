@@ -1,0 +1,43 @@
+.env
+.env.local
+roots/*/.env
+# Any .env variant (backups like .env.bak, .env.local) is a
+# live credential file. Ignore them all; .env.example is the exception.
+roots/*/.env.*
+!/.env*.example
+!roots/*/.env.example
+node_modules/
+*.log
+
+# Auto-generated on core startup from SKILL.md frontmatter and roots/*/manifest.yaml
+vault/agents/registry.md
+
+# SQLite indexer artifacts — rebuilt by vault-indexer.js on startup
+vault/index.db
+vault/index.db-shm
+vault/index.db-wal
+
+# Binary attachments (PDFs, images). Server-side backups cover persistence;
+# keeping these out of git avoids leaking private docs (leases, receipts, etc.).
+vault/assets/
+
+# Cloned repos managed by the github root/agent. Workspace files are local
+# to the server; memory notes in vault/core/ reference them via `workspace:`
+# frontmatter.
+workspace/
+
+# Server-side secrets and runtime state (.env.core, .env.viewer, .env.tunnel, data/)
+/.env.*
+!/.env*.example
+/data/
+
+# Your personal memory. The repo ships an empty vault; everything silOS learns
+# about you stays on your server and out of git.
+vault/core/*
+!vault/core/.gitkeep
+vault/conversations/*
+!vault/conversations/.gitkeep
+vault/agents/*/memory/*
+!vault/agents/*/memory/.gitkeep
+vault/secrets/
+vault/agents/*/scripts/.env

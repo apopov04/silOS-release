@@ -1,0 +1,13 @@
+{
+  "name": "silos-core",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "latest",
+    "better-sqlite3": "^13.0.0",
+    "gray-matter": "^4.0.3",
+    "chokidar": "^4.0.0",
+    "js-yaml": "^4.1.0",
+    "node-schedule": "^2.1.1"
+  }
+}

@@ -1,0 +1,39 @@
+name: github
+version: 0.1
+description: GitHub root — wraps the `gh` CLI for repo/issue/PR/file operations. Auth via classic PAT (repo scope) stored in .env as GH_TOKEN. Cloned repos land in /app/workspace/<slug>/; the github agent reports [CLONE_REPORT] blocks for core to file as project notes in the vault.
+requires_env:
+  - GH_TOKEN
+commands:
+  - name: repo_list
+    usage: node /app/roots/github/cli.js repo-list [--limit N]
+    description: List repositories the authenticated account can access (default N=30, max 100). Returns JSON with nameWithOwner, description, visibility, updatedAt.
+  - name: repo_clone
+    usage: node /app/roots/github/cli.js repo-clone <owner/repo>
+    description: Clone (or pull, if already present) into /app/workspace/<repo-name>/. Idempotent. Returns the workspace path and whether it was a fresh clone or a pull.
+  - name: file_read
+    usage: node /app/roots/github/cli.js file-read <owner/repo> <path> [--ref <branch|sha>]
+    description: Read a single file from a repo without cloning. Defaults to the default branch. Returns decoded text content.
+  - name: issue_list
+    usage: node /app/roots/github/cli.js issue-list <owner/repo> [--state open|closed|all] [--limit N]
+    description: List issues. Default state=open, limit=30 (max 100).
+  - name: issue_read
+    usage: node /app/roots/github/cli.js issue-read <owner/repo> <number>
+    description: Full issue body plus comments.
+  - name: issue_create
+    usage: node /app/roots/github/cli.js issue-create <owner/repo> --title "<t>" --body "<b>" [--label <l>]
+    description: Create a new issue. --label may be repeated or comma-separated.
+  - name: issue_comment
+    usage: node /app/roots/github/cli.js issue-comment <owner/repo> <number> --body "<b>"
+    description: Add a comment to an existing issue.
+  - name: pr_list
+    usage: node /app/roots/github/cli.js pr-list <owner/repo> [--state open|closed|all] [--limit N]
+    description: List pull requests. Default state=open, limit=30 (max 100).
+  - name: pr_read
+    usage: node /app/roots/github/cli.js pr-read <owner/repo> <number>
+    description: Full PR body plus comments (review comments not included — use pr-diff for the code changes).
+  - name: pr_diff
+    usage: node /app/roots/github/cli.js pr-diff <owner/repo> <number>
+    description: Unified diff of the PR's changes.
+  - name: pr_comment
+    usage: node /app/roots/github/cli.js pr-comment <owner/repo> <number> --body "<b>"
+    description: Add a top-level comment to a PR (not a review comment).

@@ -1,0 +1,8 @@
+name: echo
+version: 1.0
+description: Dummy root used to sanity-check the registry loader. Echoes input back.
+commands:
+  - name: echo
+    usage: node /app/roots/echo/cli.js echo <text>
+    description: Print the given text back on stdout
+requires_env: []

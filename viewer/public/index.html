@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Memory</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="/force-graph.min.js"></script>
+</head>
+<body>
+  <div id="graph"></div>
+  <div id="status" role="status">Loading memory…</div>
+  <section id="sheet" hidden aria-live="polite">
+    <div class="grab"></div>
+    <div class="head">
+      <h1 id="sheet-title"></h1>
+      <span id="sheet-type" class="badge"></span>
+    </div>
+    <h2 id="out-label"></h2>
+    <ul id="out-list"></ul>
+    <h2 id="in-label"></h2>
+    <ul id="in-list"></ul>
+  </section>
+  <script src="/app.js"></script>
+</body>
+</html>

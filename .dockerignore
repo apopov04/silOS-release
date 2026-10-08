@@ -1,0 +1,14 @@
+.git
+.claude
+node_modules
+**/node_modules
+docs
+*.md
+# Never bake credentials or personal data into images; they're mounted at runtime.
+.env
+.env.*
+**/.env
+**/.env.*
+vault
+workspace
+data

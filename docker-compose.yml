@@ -1,0 +1,146 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: docker/bot.Dockerfile
+    env_file: .env
+    restart: always
+    networks:
+      - internal
+    depends_on:
+      - core
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Read-only so bot can stream files to Telegram but can't write into the
+      # memory graph (preserves write-isolation per CLAUDE.md's security model).
+      - ./vault:/app/vault:ro
+      # Small writable state dir. The bot's rootfs is read-only and /tmp is a
+      # tmpfs wiped on recreate, so without this the Telegram chat id cannot
+      # survive a restart and every push path breaks until the user messages.
+      - ./data/bot:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+
+  core:
+    build:
+      context: .
+      dockerfile: docker/core.Dockerfile
+    restart: always
+    environment:
+      - TZ=${TZ:-UTC}
+    networks:
+      - internal
+    volumes:
+      - ./vault:/app/vault
+      - ./roots/gmail/.env:/app/roots/gmail/.env:ro
+      - ./roots/github/.env:/app/roots/github/.env:ro
+      - ./workspace:/app/workspace
+      # Structure-only graph snapshot (titles + links) for the memory viewer.
+      - ./data/graph:/app/data/graph
+      - claude-auth:/home/node
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1280M
+          cpus: "0.75"
+
+  # Memory viewer (Telegram Mini App). The only internet-reachable service.
+  # Sees nothing but the structure-only graph snapshot; no vault, no core.
+  # Optional: only started with `docker compose --profile viewer up -d`.
+  viewer:
+    profiles: ["viewer"]
+    build:
+      context: .
+      dockerfile: docker/viewer.Dockerfile
+    env_file:
+      - path: .env.viewer   # VIEWER_SECRET_KEY, OWNER_TELEGRAM_ID (untracked)
+        required: false
+    restart: always
+    networks:
+      - tunnel
+    volumes:
+      - ./data/graph:/data:ro
+    read_only: true
+    user: node
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3003/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+
+  cloudflared:
+    profiles: ["viewer"]
+    image: cloudflare/cloudflared:2026.9.3
+    command: tunnel --no-autoupdate run
+    env_file:
+      - path: .env.tunnel   # TUNNEL_TOKEN (untracked)
+        required: false
+    restart: always
+    depends_on:
+      - viewer
+    networks:
+      - tunnel
+      - egress
+    read_only: true
+    user: "65532:65532"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+
+networks:
+  internal:
+    driver: bridge
+  # viewer <-> cloudflared only. internal: true = no route to the internet.
+  tunnel:
+    driver: bridge
+    internal: true
+  # cloudflared's way out to Cloudflare.
+  egress:
+    driver: bridge
+
+volumes:
+  claude-auth:

@@ -1,0 +1,23 @@
+name: gmail
+version: 0.1
+description: Gmail API root — exposes read/search/send commands to agents that require it. Auth via OAuth 2.0 refresh token stored in .env.
+requires_env:
+  - GMAIL_CLIENT_ID
+  - GMAIL_CLIENT_SECRET
+  - GMAIL_REFRESH_TOKEN
+commands:
+  - name: list_unread
+    usage: node /app/roots/gmail/cli.js list-unread [--max N]
+    description: List unread messages in the inbox (default N=10). Returns JSON with id, from, subject, snippet per message.
+  - name: read
+    usage: node /app/roots/gmail/cli.js read <messageId>
+    description: Fetch full headers and body of a message by id.
+  - name: search
+    usage: node /app/roots/gmail/cli.js search "<gmail query>" [--max N]
+    description: Run a Gmail search query (same syntax as the Gmail UI). Returns summary JSON.
+  - name: send
+    usage: node /app/roots/gmail/cli.js send --to <addr> --subject "<s>" --body "<b>" [--cc addr] [--bcc addr]
+    description: Send an email from the connected Gmail account.
+  - name: mark_read
+    usage: node /app/roots/gmail/cli.js mark-read <id> [<id> ...]  |  mark-read --all
+    description: Remove the UNREAD label from one or more messages. Positional ids, or --all to clear every unread in the account. Uses batchModify (up to 1000 ids per API call).
