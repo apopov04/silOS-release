@@ -2,6 +2,10 @@
 
 **A self-hosted, security-first AI assistant that lives on your server and talks to you on Telegram.**
 
+<p align="center">
+  <img src="docs/assets/silos-demo.gif" alt="silOS demo: chat on Telegram, persistent vault memory across sessions, and isolated agents that contain prompt injections" width="800">
+</p>
+
 You message a Telegram bot from your phone. Behind it, a persistent Claude session (the *core*) runs on your own server. It remembers things in a markdown knowledge graph (the *vault*), hands specialist work to *agents*, and reaches outside services through *roots* such as Gmail and GitHub. You only ever see a chat.
 
 silOS is a framework, not an app. Think of it as the OS: it provides the runtime, memory, scheduling and isolation, and agents are the apps that run on it.
